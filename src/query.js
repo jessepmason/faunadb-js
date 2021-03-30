@@ -3050,6 +3050,13 @@ function wrap(obj) {
   } else if (obj instanceof Uint8Array || obj instanceof ArrayBuffer) {
     return new values.Bytes(obj)
   } else if (typeof obj === 'object') {
+      // JESSE ADDED
+      // allows me to set ref from browser
+      if(obj["@raw"]){
+        return new Expr(obj["@raw"])
+  
+      }
+      // JESSE ADDED END
     return new Expr({ object: wrapValues(obj) })
   } else {
     return obj
