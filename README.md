@@ -242,6 +242,30 @@ const client = new faunadb.Client({
 })
 ```
 
+#### Termination
+
+Usually, the `Client#close` method should be called upon application's termination in order to clean up all held resources like HTTP2 sessions and to release the Event Loop (for NodeJS).
+Note that if you don't call the `.close` method, your script will just hang on the NodeJS environment:
+
+```javascript
+// sample.js (run it with "node sample.js" command)
+const { Client, query: Q } = require('faunadb')
+
+;(async function main() {
+  const client = new Client({
+    secret: 'YOUR_FAUNADB_SECRET',
+  })
+  const output = await client.query(Q.Add(1, 1))
+
+  console.log(output)
+
+  client.close()
+  //     ^^^ If it's not called the script won't be terminated properly
+})()
+```
+
+With this in mind, make sure you add the `Client#close` call as part of your application's termination phase.
+
 ## Known issues
 
 ### Using with Cloudflare Workers

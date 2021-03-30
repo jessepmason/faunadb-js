@@ -246,6 +246,17 @@ Client.prototype.syncLastTxnTime = function(time) {
   this._http.syncLastTxnTime(time)
 }
 
+/**
+ * Cleanups the held resources.
+ * Usually should be used upon application's termination in order to cleanup
+ * all held resources like HTTP2 sessions and to release the Event Loop.
+ *
+ * @returns {void}
+ */
+Client.prototype.close = function() {
+  this._http.close()
+}
+
 Client.prototype._execute = function(method, path, data, query, options) {
   query = util.defaults(query, null)
 

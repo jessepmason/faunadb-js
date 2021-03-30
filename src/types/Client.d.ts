@@ -45,5 +45,6 @@ export default class Client {
   query<T = object>(expr: ExprArg, options?: QueryOptions): Promise<T>
   paginate(expr: Expr, params?: object, options?: QueryOptions): PageHelper
   ping(scope?: string, timeout?: number): Promise<string>
+  close(): void
   stream: StreamApi
 }

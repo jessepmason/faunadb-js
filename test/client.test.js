@@ -143,6 +143,18 @@ describe('Client', () => {
     return expect(resultWithoutOptions).toEqual(resultWithOptions)
   })
 
+  test('cleanups http2 resources when .close is called', async () => {
+    const client = util.getClient()
+
+    await client.ping()
+
+    expect(Object.keys(client._http._adapter._sessionMap).length > 0).toBe(true)
+
+    client.close()
+
+    expect(client._http._adapter._sessionMap).toEqual({})
+  })
+
   test('uses custom fetch', async function() {
     const fetch = jest.fn(() =>
       Promise.resolve({

@@ -3,8 +3,6 @@ var http2 = require('http2')
 var errors = require('./errors')
 var util = require('../_util')
 
-// Destroy session after 1 minute of inactivity.
-var DESTROY_HTTP2_SESSION_TIME = 1000 * 60
 var STREAM_PREFIX = 'stream::'
 
 /**
@@ -53,9 +51,6 @@ Http2Adapter.prototype._resolveSessionFor = function(origin, isStreaming) {
       .connect(origin)
       .once('error', cleanup)
       .once('goaway', cleanup)
-      // Destroys http2 session after specified time of inactivity
-      // and releases event loop.
-      .setTimeout(DESTROY_HTTP2_SESSION_TIME, cleanup)
   }
 
   return this._sessionMap[sessionKey]
@@ -221,6 +216,19 @@ Http2Adapter.prototype.execute = function(options) {
       rejectOrOnError(error)
     }
   })
+}
+
+/**
+ * Destroys all the sessions and resets the session map.
+ *
+ * @returns {void}
+ */
+Http2Adapter.prototype.close = function() {
+  Object.values(this._sessionMap).forEach(function(session) {
+    session.destroy()
+  })
+
+  this._sessionMap = {}
 }
 
 module.exports = Http2Adapter
