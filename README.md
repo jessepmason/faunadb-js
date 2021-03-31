@@ -1,3 +1,46 @@
+
+# JESSE CHANGES
+
+i replaced the wrap function in the query.js file from fauna node module.It allows me to cusomize fauna functions from client. Like setting ref in document:
+
+```
+function wrap(obj) {
+  arity.exact(1, arguments, wrap.name)
+  if (obj === null) {
+    return null
+  } else if (
+    obj instanceof Expr ||
+    util.checkInstanceHasProperty(obj, '_isFaunaExpr')
+  ) {
+    return obj
+  } else if (typeof obj === 'symbol') {
+    return obj.toString().replace(/Symbol\((.*)\)/, function(str, symbol) {
+      return symbol
+    })
+  } else if (typeof obj === 'function') {
+    return Lambda(obj)
+  } else if (Array.isArray(obj)) {
+    return new Expr(
+      obj.map(function(elem) {
+        return wrap(elem)
+      })
+    )
+  } else if (obj instanceof Uint8Array || obj instanceof ArrayBuffer) {
+    return new values.Bytes(obj)
+  } else if (typeof obj === 'object') {
+    // JESSE ADDED
+    if(obj["@raw"]){
+      return new Expr(obj["@raw"])
+
+    }
+    // JESSE ADDED END
+    return new Expr({ object: wrapValues(obj) })
+  } else {
+    return obj
+  }
+}
+```
+
 # FaunaDB Javascript Driver
 
 [![CircleCI](https://circleci.com/gh/fauna/faunadb-js.svg?style=svg)](https://circleci.com/gh/fauna/faunadb-js)
