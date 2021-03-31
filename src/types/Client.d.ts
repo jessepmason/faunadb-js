@@ -21,7 +21,7 @@ export interface ClientConfig {
   ) => void
   keepAlive?: boolean
   headers?: { [key: string]: string | number }
-  fetch?: typeof fetch
+  fetch?: any //JESSE: :fetch  CASUES ERRORS WITH DOM TS LIB
 }
 
 export interface QueryOptions
