@@ -51,6 +51,25 @@ function isNodeEnv() {
 }
 
 /**
+ * Resolves environment variable if available.
+ *
+ * @param {string} envKey A name of env variable.
+ * @return {void|string} Returns requested env variable or void.
+ * @private
+ */
+function getEnvVariable(envKey) {
+  var areEnvVarsAvailable = !!(
+    typeof process !== 'undefined' &&
+    process &&
+    process.env
+  )
+
+  if (areEnvVarsAvailable && process.env[envKey] != null) {
+    return process.env[envKey]
+  }
+}
+
+/**
  * JavaScript Client Detection
  * @private
  */
@@ -249,16 +268,6 @@ function getNodeRuntimeEnv() {
         process.env.ORYX_ENV_TYPE === 'AppService',
     },
     {
-      name: 'Worker',
-      check: () => {
-        try {
-          return global instanceof ServiceWorkerGlobalScope
-        } catch (error) {
-          return false
-        }
-      },
-    },
-    {
       name: 'Mongo Stitch',
       check: () => typeof global.StitchError === 'function',
     },
@@ -448,6 +457,7 @@ module.exports = {
   querystringify: querystringify,
   inherits: inherits,
   isNodeEnv: isNodeEnv,
+  getEnvVariable: getEnvVariable,
   defaults: defaults,
   applyDefaults: applyDefaults,
   removeNullAndUndefinedValues: removeNullAndUndefinedValues,

@@ -24,7 +24,9 @@ function HttpClient(options) {
   var useHttp2Adapter = !options.fetch && util.isNodeEnv() && isHttp2Supported()
 
   this._adapter = useHttp2Adapter
-    ? new (require('./http2Adapter'))()
+    ? new (require('./http2Adapter'))({
+        http2SessionIdleTime: options.http2SessionIdleTime,
+      })
     : new (require('./fetchAdapter'))({
         isHttps: isHttps,
         fetch: options.fetch,
@@ -122,16 +124,28 @@ function getDefaultHeaders() {
     driver: ['javascript', packageJson.version].join('-'),
   }
 
-  if (util.isNodeEnv()) {
-    driverEnv.runtime = ['nodejs', process.version].join('-')
-    driverEnv.env = util.getNodeRuntimeEnv()
-    var os = require('os')
-    driverEnv.os = [os.platform(), os.release()].join('-')
-  } else {
-    driverEnv.runtime = util.getBrowserDetails()
-    driverEnv.env = 'unknown'
-    driverEnv.os = getBrowserOsDetails()
+  var isServiceWorker
+
+  try {
+    isServiceWorker = global instanceof ServiceWorkerGlobalScope
+  } catch (error) {
+    isServiceWorker = false
   }
+
+  try {
+    if (util.isNodeEnv()) {
+      driverEnv.runtime = ['nodejs', process.version].join('-')
+      driverEnv.env = util.getNodeRuntimeEnv()
+      var os = require('os')
+      driverEnv.os = [os.platform(), os.release()].join('-')
+    } else if (isServiceWorker) {
+      driverEnv.runtime = 'Service Worker'
+    } else {
+      driverEnv.runtime = util.getBrowserDetails()
+      driverEnv.env = 'browser'
+      driverEnv.os = getBrowserOsDetails()
+    }
+  } catch (_) {}
 
   var headers = {
     'X-FaunaDB-API-Version': packageJson.apiVersion,
